@@ -36,7 +36,7 @@ def generate_data_for_new_list(data_loc: str) -> pd.DataFrame:
     return df.groupby("line")["npi"].apply(list).reset_index()
 
 
-def create_new_npi_list(account_id: int, new_lists: list):
+def create_new_npi_list(account_id: int, new_lists: list) -> pd.DataFrame:
     """
     Create a new NPI list for a given account.
 
@@ -55,6 +55,7 @@ def create_new_npi_list(account_id: int, new_lists: list):
     conn = napi_token.establish_connection(token)
 
     list = {}
+    newly_created_lists = []
 
     for l in new_lists:
         list = {
@@ -75,7 +76,14 @@ def create_new_npi_list(account_id: int, new_lists: list):
 
                 logging.info(
                     {
-                        "message": "New NPI list created",
+                        "id": data["id"],
+                        "name": data["name"],
+                        "npis": data["npis"],
+                    }
+                )
+
+                newly_created_lists.append(
+                    {
                         "id": data["id"],
                         "name": data["name"],
                     }
@@ -86,3 +94,5 @@ def create_new_npi_list(account_id: int, new_lists: list):
 
         except HTTPError as error:
             raise error
+
+    return pd.DataFrame(newly_created_lists, columns=["id", "name"])

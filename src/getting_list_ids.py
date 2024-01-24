@@ -22,7 +22,7 @@ napi_token = TokenGeneration()
 token = napi_token.get_user_token(c["user"]["username"], c["user"]["password"])
 
 
-def get_all_npi_lists(account_id: str, num_to_extract: int):
+def get_all_npi_lists(account_id: str) -> dict:
     """
     Retrieves a specified number of NPI lists associated with the given account ID.
 
@@ -48,6 +48,4 @@ def get_all_npi_lists(account_id: str, num_to_extract: int):
     except HTTPError as error:
         raise error
 
-    return [{"id": d["id"], "name": d["name"]} for d in reversed(data)][
-        0:num_to_extract
-    ]
+    return data

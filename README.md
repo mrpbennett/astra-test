@@ -62,6 +62,6 @@ After the above code block we will have a list consisting of the list name and a
 [{'name': 'astra-test-list-1', 'npis': [4325401289, 3612762430]}, {'name': 'astra-test-list-2', 'npis': [7728082988, 2374690575]}]
 ```
 
-We can then pass the above new list of dicts into a function that will loop through it and create separate dicts to pass into the endpoint. See [`create_new_npi_list`](https://github.com/mrpbennett/astra-test/blob/d3edb56a31866139e9db2e4f7db54f2dd8a7e172/src/create_npi_list.py#L30) which takes the `new_lists` list and `account_id` as arguments.
+We can then pass the above new list of dicts into a function that will loop through it and create separate dicts to pass into the endpoint. See [`create_new_npi_list`](https://github.com/mrpbennett/astra-test/blob/d3edb56a31866139e9db2e4f7db54f2dd8a7e172/src/create_npi_list.py#L39) which takes the `new_lists` list and `account_id` as arguments and returns a DataFrame of the newly created lists and their IDs and Names. This is then exported into the `dumps` directory as a csv for reference.
 
 !! The issue you could run into here is by not knowing the advertiser, we require the advertiser to be passed when creating a list. Therefore you may require to change your dataset.
