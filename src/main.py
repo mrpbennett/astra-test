@@ -1,10 +1,12 @@
+import json
 import logging
 from datetime import datetime
 
 import tomli
 
+from create_npi_list import create_new_npi_list, generate_data_for_new_list
 from get_token import TokenGeneration
-from method_1 import create_new_npi_list, generate_data_for_new_list
+from getting_list_ids import get_all_npi_lists
 
 # Logger
 logging.basicConfig(
@@ -27,7 +29,6 @@ napi_token = TokenGeneration()
 
 
 def main():
-    # CREATING THE NEW LIST
     new_lists = []
 
     for index, row in generate_data_for_new_list("../data/method_1.csv").iterrows():
@@ -36,8 +37,13 @@ def main():
         # Append the dictionary to the list
         new_lists.append(dict_entry)
 
-    print(new_lists)
-    # create_new_npi_list(c["user"]["account_id"], new_lists)
+    create_new_npi_list(c["user"]["account_id"], new_lists)
+
+    # GETTING LISTS FROM ACCOUNT
+    all_lists = get_all_npi_lists(c["user"]["account_id"], len(new_lists))
+
+    # Prints only the lists that were created
+    print(json.dumps(all_lists, indent=4, sort_keys=True))
 
 
 if __name__ == "__main__":

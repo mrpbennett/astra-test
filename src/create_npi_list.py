@@ -1,5 +1,5 @@
 import logging
-from typing import Literal
+import time
 
 import pandas as pd
 import requests
@@ -23,11 +23,35 @@ token = napi_token.get_user_token(c["user"]["username"], c["user"]["password"])
 
 
 def generate_data_for_new_list(data_loc: str) -> pd.DataFrame:
+    """
+    Generate a new DataFrame by grouping the data based on the 'line' column and creating a list of 'npi' values for each group.
+
+    Args:
+        data_loc (str): The file path of the CSV data.
+
+    Returns:
+        pd.DataFrame: The new DataFrame with grouped data.
+    """
     df = pd.read_csv(data_loc)
     return df.groupby("line")["npi"].apply(list).reset_index()
 
 
 def create_new_npi_list(account_id: int, new_lists: list):
+    """
+    Create a new NPI list for a given account.
+
+    Args:
+        account_id (int): The ID of the account.
+        new_lists (list): A list of dictionaries containing the new NPI lists to be created. Each dictionary should have the following keys:
+            - name (str): The name of the list.
+            - npis (list): A list of NPIs (National Provider Identifiers) to be included in the list.
+
+    Raises:
+        HTTPError: If there is an error while making the API request.
+
+    Returns:
+        None
+    """
     conn = napi_token.establish_connection(token)
 
     list = {}
@@ -47,7 +71,18 @@ def create_new_npi_list(account_id: int, new_lists: list):
             res.raise_for_status()
 
             if res.status_code == requests.codes.ok:
-                logging.info(f"New list created: {res.json()}")
+                data = res.json()
+
+                logging.info(
+                    {
+                        "message": "New NPI list created",
+                        "id": data["id"],
+                        "name": data["name"],
+                    }
+                )
+
+                # sleep for 5 seconds to reduce request load
+                time.sleep(5)
 
         except HTTPError as error:
             raise error
