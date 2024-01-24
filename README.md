@@ -1,88 +1,47 @@
-# S3 Bucket Automation
+# AstraZeneca NPI API examples
 
-## Testing
+## Creating NPI lists from a csv
 
-So far I have tested it the script with two different users on the same account and one seperate user on a different account.
+File: [`method_1.py`](src/method_1.py)
 
-I have used three S3 directories, with multiple files in each.
+Here we are creating multiple lists from a single csv file. Using the example file [method_1.csv](data/method_1.csv) we can use Pandas to do the heavy lifting for us. Read the csv in as a Dataframe which becomes:
 
-So far everything is working well.
-
-
-
-## get_from_supabase():
-
-This is a simple function that simply returns all rows back from our database
-table if the length of the data object is greater than 0
-
-## send_slack_message(message):
-
-The function allows us to send a message to a Slack channel, allowing us to send
-errors / success messages instead of looking through log files.
-
-## clean_up_files_in_downloads():
-
-This cleans up our downloads directory everytime the script runs. This prevents
-the downloads directory from becoming bloated.
-
-## check_bucket(directory):
-
-The function loops through the S3 bucket contents, adding each object to a list
-called `files` which will give us a giant list of all the listed files /
-directories which will look like `'paul_test/pb_test.csv'`
-
-Then we loop through `files` spliting each item on the `/` allowing us to get
-the directory name and filename. This is then appended to a list called
-`s3_dirs` where the output is as below:
-
-```
-['paul_test', ''], ['paul_test', 'Sage_Trigger_2022-05-11.csv'], ['paul_test', 'pb_test.csv']
+```csv
+          npi          list_name
+0  4325401289  astra-test-list-1
+1  7728082988  astra-test-list-2
+2  3612762430  astra-test-list-1
+3  2374690575  astra-test-list-2
 ```
 
-We then compare the first item in the list (the directory), with what is stored
-in our database. Taking only those that match.
+We then can group the npis by list name so we have a DataFrame like so:
 
-We then join the matches back to together on `/` again to make the object key
-whole again example being:
-
-```
-paul_test/Sage_Trigger_2022-05-11.csv
+```csv
+           list_name                       npi
+0  astra-test-list-1  [4325401289, 3612762430]
+1  astra-test-list-2  [7728082988, 2374690575]
 ```
 
-We then use `del file_objects[0]` to remove the first item in the `file_objects`
-list, which is the directory name only using the example above that would be:
+We can then loop through the Dataframe rows creating a dictionary of each row by taking the first position and calling name and the second position can calling it npi.
 
-```
-['paul_test', '']
-```
-
-## def main():
-
-Under our main function we call the `clean_up_files_in_downloads` function,
-cleaning up our downloads directory.
-
-We then call our `get_from_supabase` function if it returns True we then loop
-through the returned data, spliting the following items into lists.
-
-- buckets
-- usernames
-- passwords
-- account_id
-
-This allows us to store the relevant items into lists so we can loop through
-them.
-
-Using `zip` we can loop through each list at the same time like so:
+The `generate_data_for_new_list` will be used in the following manner to create the list of dicts which will need to be passed to the api endpoint:
 
 ```python
-for bucket, username, password, account in zip(
-        buckets, usernames, passwords, account_id
-    ):
+def generate_data_for_new_list(data_loc: str) -> pd.DataFrame:
+    df = pd.read_csv(data_loc)
+    return df.groupby("list_name")["npi"].apply(list).reset_index()
+
+new_lists = []
+
+for index, row in generate_data_for_new_list("../data/method_1.csv").iterrows():
+    # Create a dictionary for each row
+    dict_entry = {"name": row.iloc[0], "npis": row.iloc[1]}
+    # Append the dictionary to the list
+    new_lists.append(dict_entry)
 ```
 
-Within the `for` loop we set up another `for` loop where we loop through the
-contents of `check_bucket` passing the `bucket` from the zip loop.
+After the above code block we will have a list consisting of the list name and all the npis associated to that name:
 
-We then download each file into our download directory for our
-`replace_multiple_npi_lists` to manage. We pass in the `token`, `file` and
-`account`
+```python
+[{'name': 'astra-test-list-1', 'npis': [4325401289, 3612762430]}, {'name': 'astra-test-list-2', 'npis': [7728082988, 2374690575]}]
+```

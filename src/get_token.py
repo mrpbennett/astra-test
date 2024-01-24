@@ -1,14 +1,11 @@
 import logging
-import time
 
-import pandas as pd
-import requests
 import tomli
 from authlib.integrations.requests_client import OAuth2Session
 from requests.exceptions import HTTPError
 
 # CONFIG FILE
-with open("config.toml", mode="rb") as conf:
+with open("../config.toml", mode="rb") as conf:
     c = tomli.load(conf)
 
 
