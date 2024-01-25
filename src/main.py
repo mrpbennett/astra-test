@@ -6,7 +6,6 @@ import pandas as pd
 import tomli
 
 from create_npi_list import create_new_npi_list, generate_data_for_new_list
-from get_token import TokenGeneration
 from getting_list_ids import get_all_npi_lists
 
 # Logger
@@ -18,10 +17,6 @@ logging.basicConfig(
 # CONFIG FILE
 with open("../config.toml", mode="rb") as conf:
     c = tomli.load(conf)
-
-
-# Token Generation
-napi_token = TokenGeneration()
 
 
 def main():

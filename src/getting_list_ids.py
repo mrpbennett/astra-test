@@ -18,8 +18,8 @@ logging.basicConfig(
 )
 
 # Token Generation
-napi_token = TokenGeneration()
-token = napi_token.get_user_token(c["user"]["username"], c["user"]["password"])
+token_inst = TokenGeneration()
+token = token_inst.get_user_token(c["user"]["username"], c["user"]["password"])
 
 
 def get_all_npi_lists(account_id: str) -> dict:
@@ -33,7 +33,7 @@ def get_all_npi_lists(account_id: str) -> dict:
     Returns:
         list: A list of dictionaries containing the ID and name of the NPI lists.
     """
-    conn = napi_token.establish_connection(token)
+    conn = token_inst.establish_connection(token)
     data = {}
 
     try:

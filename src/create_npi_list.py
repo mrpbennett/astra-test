@@ -18,8 +18,8 @@ logging.basicConfig(
 )
 
 # Token Generation
-napi_token = TokenGeneration()
-token = napi_token.get_user_token(c["user"]["username"], c["user"]["password"])
+token_inst = TokenGeneration()
+token = token_inst.get_user_token(c["user"]["username"], c["user"]["password"])
 
 
 def generate_data_for_new_list(data_loc: str) -> pd.DataFrame:
@@ -52,7 +52,7 @@ def create_new_npi_list(account_id: int, new_lists: list) -> pd.DataFrame:
     Returns:
         None
     """
-    conn = napi_token.establish_connection(token)
+    conn = token_inst.establish_connection(token)
 
     list = {}
     newly_created_lists = []
@@ -61,6 +61,8 @@ def create_new_npi_list(account_id: int, new_lists: list) -> pd.DataFrame:
         list = {
             "name": l["name"],
             "npis": l["npis"],
+            # Hardcoded -
+            # You may need to include this in your dataset as an extra col.
             "advertisers": ["TAMTESTING ACCOUNT"],
         }
 
